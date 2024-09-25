@@ -1,0 +1,52 @@
+services:
+  # Configuração do SQL Server Express
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: sqlserver
+    environment:
+      - ACCEPT_EULA=Y # Aceitar os termos de uso do SQL Server
+      - MSSQL_SA_PASSWORD=BRAneF!@!2024 # Definir a senha do usuário SA
+      - MSSQL_PID=Express # Definir a edição do SQL Server como Express
+    ports:
+      - "1433:1433" # Porta padrão para conexões SQL Server
+    volumes:
+      - sqlserver_data:/var/opt/mssql # Persistência de dados
+    networks:
+      - branefnetwork
+
+  # Configuração do MongoDB
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=123456
+    ports:
+      - "27017:27017" # Porta padrão do MongoDB
+    volumes:
+      - mongodb_data:/data/db # Persistência de dados
+    networks:
+      - branefnetwork
+
+  mongo-express:
+    image: mongo-express:latest
+    container_name: mongo-express
+    environment:
+      - ME_CONFIG_BASICAUTH_PASSWORD=123456
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=123456
+      - ME_CONFIG_MONGODB_SERVER=mongodb # Nome do serviço do MongoDB
+    ports:
+      - "8081:8081" # Porta onde o Mongo Express estará acessível
+    depends_on:
+      - mongodb # Garante que o MongoDB esteja rodando antes do Mongo Express
+    networks:
+      - branefnetwork
+    # Definição de volumes para persistência
+volumes:
+  sqlserver_data: {}
+  mongodb_data: {}
+# Rede customizada para comunicação entre os contêineres
+networks:
+  branefnetwork:
+    driver: bridge
